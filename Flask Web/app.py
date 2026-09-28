@@ -17,19 +17,15 @@ def read_file(path, fallback):
     except FileNotFoundError:
         return fallback
 
-@app.route("/")
-def index():
-    source_code = read_file(SCRIPT_PATH, "# Main Python file not found on server")
-    support_code = read_file(SUPPORT_PATH, "# Support file not found on server")
-
-    return render_template(
-        "index.html",
-        python_file=PYTHON_FILE,
-        source_code=source_code,
-        support_file=SUPPORT_FILE,
-        support_code=support_code
-    )
-
+@app.route("/debug")
+def debug():
+    import subprocess
+    files = {f: os.path.getsize(os.path.join(BASE_DIR, f)) for f in os.listdir(BASE_DIR)}
+    return {
+        "base_dir": BASE_DIR,
+        "files_and_sizes": files,
+        "easy_py_preview": read_file(SCRIPT_PATH, "NOT FOUND")[:200],
+    }
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
