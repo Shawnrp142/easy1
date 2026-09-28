@@ -3,34 +3,31 @@ import os
 
 app = Flask(__name__)
 
-PYTHON_FILE = "easy.py" 
+PYTHON_FILE = "easy.py"
 SUPPORT_FILE = "nth.py"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRIPT_PATH = os.path.join(BASE_DIR, PYTHON_FILE)
 SUPPORT_PATH = os.path.join(BASE_DIR, SUPPORT_FILE)
 
-try:
-    with open(SUPPORT_PATH, "r", encoding="utf-8") as file:
-        SUPPORT_CODE_CONTENT = file.read()
-except FileNotFoundError:
-    SUPPORT_CODE_CONTENT = "# Support file not found on server"
+def read_file(path, fallback):
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        return fallback
 
 @app.route("/")
 def index():
-    try:
-        with open(SCRIPT_PATH, "r", encoding="utf-8") as file:
-            source_code = file.read()
-    except FileNotFoundError:
-        source_code = "# Main Python file not found on server"
-
+    source_code = read_file(SCRIPT_PATH, "# Main Python file not found on server")
+    support_code = read_file(SUPPORT_PATH, "# Support file not found on server")
 
     return render_template(
         "index.html",
-        easy_py_name=PYTHON_FILE,
-        easy={"py": source_code},
+        python_file=PYTHON_FILE,
+        source_code=source_code,
         support_file=SUPPORT_FILE,
-        support_code=SUPPORT_CODE_CONTENT
+        support_code=support_code
     )
 
 if __name__ == "__main__":
